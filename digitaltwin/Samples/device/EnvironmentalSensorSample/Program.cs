@@ -65,16 +65,15 @@ namespace EnvironmentalSensorSample
 
         public static int Main(string[] args)
         {
-            if (string.IsNullOrWhiteSpace(s_idScope) && (args.Length > 0))
+            if (args.Length < 3)
             {
-                s_idScope = args[0];
-            }
-
-            if (string.IsNullOrWhiteSpace(s_idScope))
-            {
-                Console.WriteLine("ProvisioningDeviceClientSymmetricKey <IDScope>");
+                Console.WriteLine("ProvisioningDeviceClientSymmetricKey <IDScope> <Secret> <registration>");
                 return 1;
             }
+
+            s_idScope = args[0];
+            individualEnrollmentPrimaryKey = individualEnrollmentSecondaryKey = args[1];
+            registrationId = args[2];
 
             string primaryKey = "";
             string secondaryKey = "";
