@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EnvironmentSensorLib\EnvironmentalSensorLib.csproj" />
-    <PackageReference Include="Microsoft.Azure.Devices.Client" Version="1.25.0" />
+    <PackageReference Include="Microsoft.Azure.Devices.Client" Version="1.29.0-preview-004" />
     <PackageReference Include="Microsoft.Azure.Devices.Provisioning.Transport.Amqp" Version="1.1.6" />
     <PackageReference Include="Microsoft.Azure.Devices.Provisioning.Transport.Http" Version="1.2.2" />
   </ItemGroup>

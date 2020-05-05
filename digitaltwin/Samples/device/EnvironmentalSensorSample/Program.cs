@@ -6,10 +6,8 @@ using System;
 using Microsoft.Azure.Devices.Client;
 using Microsoft.Azure.Devices.DigitalTwin.Client;
 using Microsoft.Azure.Devices.Provisioning.Client;
-using Microsoft.Azure.Devices.Provisioning.Client.Samples;
 using Microsoft.Azure.Devices.Provisioning.Client.Transport;
 using Microsoft.Azure.Devices.Shared;
-using System;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -63,7 +61,7 @@ namespace EnvironmentalSensorSample
         private const string individualEnrollmentPrimaryKey = "";
         private const string individualEnrollmentSecondaryKey = "";
 
-        public static int Main(string[] args)
+        public static async Task<int> Main(string[] args)
         {
             if (args.Length < 3)
             {
@@ -72,31 +70,12 @@ namespace EnvironmentalSensorSample
             }
 
             s_idScope = args[0];
-            individualEnrollmentPrimaryKey = individualEnrollmentSecondaryKey = args[1];
+            string primaryKey = args[1];
+            string secondaryKey = args[1];
             registrationId = args[2];
 
-            string primaryKey = "";
-            string secondaryKey = "";
-            if (!String.IsNullOrEmpty(registrationId) && !String.IsNullOrEmpty(enrollmentGroupPrimaryKey) && !String.IsNullOrEmpty(enrollmentGroupSecondaryKey))
-            {
-                //Group enrollment flow, the primary and secondary keys are derived from the enrollment group keys and from the desired registration id
-                primaryKey = ComputeDerivedSymmetricKey(Convert.FromBase64String(enrollmentGroupPrimaryKey), registrationId);
-                secondaryKey = ComputeDerivedSymmetricKey(Convert.FromBase64String(enrollmentGroupSecondaryKey), registrationId);
-            }
-            else if (!String.IsNullOrEmpty(registrationId) && !String.IsNullOrEmpty(individualEnrollmentPrimaryKey) && !String.IsNullOrEmpty(individualEnrollmentSecondaryKey))
-            {
-                //Individual enrollment flow, the primary and secondary keys are the same as the individual enrollment keys
-                primaryKey = individualEnrollmentPrimaryKey;
-                secondaryKey = individualEnrollmentSecondaryKey;
-            }
-            else
-            {
-                Console.WriteLine("Invalid configuration provided, must provide group enrollment keys or individual enrollment keys");
-                return -1;
-            }
-
-
-            using (var _security = new SecurityProviderSymmetricKey(registrationId, primaryKey, secondaryKey))
+            SecurityProvider _security;
+            using (var security = new SecurityProviderSymmetricKey(registrationId, primaryKey, secondaryKey))
             // Select one of the available transports:
             // To optimize for size, reference only the protocols used by your application.
             using (var transport = new ProvisioningTransportHandlerAmqp(TransportFallbackType.TcpOnly))
@@ -104,8 +83,10 @@ namespace EnvironmentalSensorSample
             // using (var transport = new ProvisioningTransportHandlerMqtt(TransportFallbackType.TcpOnly))
             // using (var transport = new ProvisioningTransportHandlerMqtt(TransportFallbackType.WebSocketOnly))
             {
+                _security = security;
                 ProvisioningDeviceClient _provClient =
-                    ProvisioningDeviceClient.Create(GlobalDeviceEndpoint, s_idScope, security, transport);
+                    ProvisioningDeviceClient.Create(GlobalDeviceEndpoint, s_idScope, _security, transport);
+
 
                 Console.WriteLine($"RegistrationID = {_security.GetRegistrationID()}");
                 VerifyRegistrationIdFormat(_security.GetRegistrationID());
@@ -116,13 +97,13 @@ namespace EnvironmentalSensorSample
                 Console.WriteLine($"{result.Status}");
                 Console.WriteLine($"ProvisioningClient AssignedHub: {result.AssignedHub}; DeviceID: {result.DeviceId}");
 
-                if (result.Status != ProvisioningRegistrationStatusType.Assigned) return;
+                if (result.Status != ProvisioningRegistrationStatusType.Assigned) return 1;
 
                 IAuthenticationMethod auth;
                 if (_security is SecurityProviderTpm)
                 {
                     Console.WriteLine("Creating TPM DeviceClient authentication.");
-                    auth = new DeviceAuthenticationWithTpm(result.DeviceId, _security as SecurityProviderTpm);
+                    auth = new DeviceAuthenticationWithTpm(result.DeviceId, (_security as SecurityProviderTpm));
                 }
                 else if (_security is SecurityProviderX509)
                 {
@@ -140,7 +121,7 @@ namespace EnvironmentalSensorSample
                 }
 
                 // using (var deviceClient = DeviceClient.CreateFromConnectionString(deviceConnectionString, transportType))
-                using (DeviceClient iotClient = DeviceClient.Create(result.AssignedHub, auth, TransportType.Amqp))
+                using (DeviceClient deviceClient = DeviceClient.Create(result.AssignedHub, auth, TransportType.Amqp))
                 {
                     //
                     DigitalTwinClient digitalTwinClient = new DigitalTwinClient(deviceClient);
@@ -152,7 +133,7 @@ namespace EnvironmentalSensorSample
                     }
 
                     var sample = new DigitalTwinClientSample(digitalTwinClient);
-                    sample.RunSampleAsync().GetAwaiter().GetResult();
+                    await sample.RunSampleAsync();
 
                     Console.WriteLine("Waiting to receive updates from cloud...");
                     Console.WriteLine("Press any key to exit");
@@ -160,6 +141,14 @@ namespace EnvironmentalSensorSample
                 }
             }
             return 0;
+        }
+        private static void VerifyRegistrationIdFormat(string v)
+        {
+            var r = new Regex("^[a-z0-9-]*$");
+            if (!r.IsMatch(v))
+            {
+                throw new FormatException("Invalid registrationId: The registration ID is alphanumeric, lowercase, and may contain hyphens");
+            }
         }
     }
 }
