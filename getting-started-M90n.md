@@ -11,9 +11,8 @@ Connect ThinkCentre M90n Nano IoT device to your Azure IoT Central Application
 # Table of Contents
 
 -   [Introduction](#Introduction)
+-   [Features implemented](#FeaturesImplemented)
 -   [Prerequisites](#Prerequisites)
--   [Create Azure IoT Central application](#Create_AICA)
--   [Device Connection Details](#DeviceConnectionDetails)
 -   [Prepare the Device](#preparethedevice)
 -   [Integration with IoT Central](#IntegrationwithIoTCentral)
 -   [Additional Links](#AdditionalLinks)
@@ -26,9 +25,14 @@ Connect ThinkCentre M90n Nano IoT device to your Azure IoT Central Application
 
 This document describes how to connect ThinkCentre M90n Nano IoT to Azure IoT Central application using the IoT plug and Play model. Plug and Play simplifies IoT by allowing solution developers to integrate devices without writing any device code. Using Plug and Play, device manufacturers will provide a model of their device to cloud developers to be integrated quickly into IoT Central or any solution built on the Azure IoT platform. IoT Plug and Play will be open to the community by way of a definition language and SDKs.
 
+**About ThinkCentre M90n IoT**
+
 Thanks to 8th Gen Intel® processors, the ThinkCentre M90n IoT performs as fast and reliable as a regular PC—but is only a fraction of the size. It’s also compatible with ThinkCentre Tiny-in-One monitors, enabling you to create the perfect all-in-one. With the USB-C port, you have expansion options, too. Being fanless, the ThinkCentre M90n IoT is far quieter than most PCs. You can tuck it almost anywhere. What’s more, it meets the most stringent of durability tests (including military standards) and can withstand the harshest of work environments, such as a desert or high altitude. Why rip out legacy systems, when an I/O box can breathe new life into them? In addition, you can affix the ThinkCentre M90n IoT to a VESA mount, industrial DIN rail, or any type of bracket in a flash. Designed with the ever-expanding IoT network in mind, the ThinkCentre M90n IoT has been certified for Windows 10 IoT Enterprise, Microsoft Azure IoT Edge, AWS GreenGrass, and Ubuntu. It also supports 4G LTE technology, enabling it to communicate faster with your network. Each ThinkCentre M90n IoT is hardwired with the Trusted Platform Module (TPM) chipset, an international standard for safeguarding data.
 
+<a name="FeaturesImplemented"></a>
+
 # Features implemented
+
 -   Azure IoT plug and play
 -   Register device by IoT Hub Device Provisioning Service base on an X.509 digital certificate
 -   Telemetry data sent for basic machine information
